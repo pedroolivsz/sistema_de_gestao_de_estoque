@@ -110,7 +110,7 @@ void listarProdutos(produto estoque[], int quant_estoque) {
         printf("Id: %d\n", estoque[id].id);
         printf("Quantidade: %d\n", estoque[id].quantidade);
         printf("Valor unitário: R$%.2f\n", estoque[id].valor);
-        printf("=-=-=-=-=-=-=-=-=-=-=-=\n");
+        printf("-------------------\n");
     }  
     return;
 }
@@ -132,8 +132,8 @@ void excluirProduto(produto estoque[], int *quant_estoque) {
         printf("O id informado não foi encontrado!\n");
         return;
     }
-    for(int move=item; move<*quant_estoque; move++) {
-        estoque[move] = estoque[move+1];
+    for(int mover=item; mover<*quant_estoque; mover++) {
+        estoque[mover] = estoque[mover+1];
     }
     (*quant_estoque)--;
     for(int new_id=0; new_id<*quant_estoque; new_id++) {
@@ -145,14 +145,14 @@ void excluirProduto(produto estoque[], int *quant_estoque) {
 }
 
 float valorTotalEstoque(produto estoque[], int quant_estoque) {
-    float total = 0.0;
+    float valor_total = 0.0;
     int id;
 
     for(id=0; id<quant_estoque; id++) {
-        total += estoque[id].valor * estoque[id].quantidade;
+        valor_total += estoque[id].valor * estoque[id].quantidade;
     }
 
-    return total;
+    return valor_total;
 }
 void buscarPorId(produto estoque[], int quant_estoque) {
     int buscar_id, verificar_id, encontrado = 0;
@@ -170,33 +170,33 @@ void buscarPorId(produto estoque[], int quant_estoque) {
         printf("O id não foi encontrado! Tente novamente.");
     }
     else if(encontrado==1) {
-        printf("\n===== Produto =====\n");
+        printf("\n----- Produto -----\n");
         printf("Nome: %s\n", estoque[buscar_id].nome);
         printf("Id: %d\n", estoque[buscar_id].id);
         printf("Quantidade: %d\n", estoque[buscar_id].quantidade);
         printf("Valor unitário: R$%.2f\n", estoque[buscar_id].valor);
-        printf("=-=-=-=-=-=-=-=-=-=-=\n");
+        printf("---------------------\n");
     }
     return;
 } 
 
 void editarProduto(produto estoque[], int quant_estoque) {
-    int id, p;
+    int id, item;
     printf("Digite o id do produto: ");
     scanf("%d", &id);
 
-    for(p=0; p<quant_estoque; p++) {
-        if(estoque[p].id==id) {
+    for(item=0; item<quant_estoque; item++) {
+        if(estoque[item].id==id) {
             getchar();
             printf("Novo nome: ");
-            fgets(estoque[p].nome, 50, stdin);
-            estoque[p].nome[strcspn(estoque[p].nome, "\n")] = '\0';
+            fgets(estoque[item].nome, 50, stdin);
+            estoque[item].nome[strcspn(estoque[item].nome, "\n")] = '\0';
 
             printf("Nova quantidade: ");
-            scanf("%d", &estoque[p].quantidade);
+            scanf("%d", &estoque[item].quantidade);
 
             printf("Novo valor: ");
-            scanf("%f", &estoque[p].valor);
+            scanf("%f", &estoque[item].valor);
         }
     }
     printf("\nProduto atualizado com sucesso!\n");
