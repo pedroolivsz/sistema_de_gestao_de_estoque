@@ -13,6 +13,7 @@ typedef struct {
 void adicionarProduto(produto estoque[], int *quant_estoque);
 void listarProdutos(produto estoque[], int quant_estoque);
 void excluirProduto(produto estoque[], int *quant_estoque);
+void clonarProduto(produto estoque[], int *quant_estoque);
 float valorTotalEstoque(produto estoque[], int quant_estoque);
 void buscarPorId(produto estoque[], int quant_estoque);
 void buscarPorNome(produto estoque[], int quant_estoque);
@@ -33,14 +34,15 @@ int main() {
         printf("1. Adicionar produto\n");
         printf("2. Listar produtos\n");
         printf("3. Remover produto\n");
-        printf("4. Calcular valor total do estoque\n");
-        printf("5. Buscar produto por id\n");
-        printf("6. Buscar produto por nome\n");
-        printf("7. Editar produto\n");
-        printf("8. Ordenar produtos por nome\n");
-        printf("9. Ordenar produtos por quantidade em ordem crescente\n");
-        printf("10. Ordenar produtos do menor para o maior valor\n");
-        printf("11. Gerar relatório de estoque\n");
+        printf("4. Clonar produto\n");
+        printf("5. Calcular valor total do estoque\n");
+        printf("6. Buscar produto por id\n");
+        printf("7. Buscar produto por nome\n");
+        printf("8. Editar produto\n");
+        printf("9. Ordenar produtos por nome\n");
+        printf("10. Ordenar produtos por quantidade em ordem crescente\n");
+        printf("11. Ordenar produtos do menor para o maior valor\n");
+        printf("12. Gerar relatório de estoque\n");
         printf("0. Encerrar programa\n");
         printf("===== Escolha: ");
         scanf("%d", &opcao);
@@ -56,27 +58,30 @@ int main() {
                 excluirProduto(estoque, &quantidade_estoque);
                 break;
             case 4:
-                printf("Valor total em estoque: R$%.2f\n", valorTotalEstoque(estoque, quantidade_estoque));
+                clonarProduto(estoque, &quantidade_estoque);
                 break;
             case 5:
-                buscarPorId(estoque, quantidade_estoque);
+                printf("Valor total em estoque: R$%.2f\n", valorTotalEstoque(estoque, quantidade_estoque));
                 break;
             case 6:
-                buscarPorNome(estoque, quantidade_estoque);
+                buscarPorId(estoque, quantidade_estoque);
                 break;
             case 7:
-                editarProduto(estoque, quantidade_estoque);
+                buscarPorNome(estoque, quantidade_estoque);
                 break;
             case 8:
-                ordenarPorNome(estoque, quantidade_estoque);
+                editarProduto(estoque, quantidade_estoque);
                 break;
             case 9:
-                ordenarPorQuantidade(estoque, quantidade_estoque);
+                ordenarPorNome(estoque, quantidade_estoque);
                 break;
             case 10:
-                ordenarPorValorUnitario(estoque, quantidade_estoque);
+                ordenarPorQuantidade(estoque, quantidade_estoque);
                 break;
             case 11:
+                ordenarPorValorUnitario(estoque, quantidade_estoque);
+                break;
+            case 12:
                 relatorioDeEstoque(estoque, quantidade_estoque);
                 break;
             case 0:
@@ -312,4 +317,32 @@ void relatorioDeEstoque(produto estoque[], int quant_estoque) {
     printf("Valor total em estoque: R$%.2f\n", valorTotalEstoque(estoque, quant_estoque));
     printf("===========================================================\n");
     return;
+}
+void clonarProduto(produto estoque[], int *quant_estoque) {
+    int id_original, id_copia;
+
+    if(*quant_estoque >= MAX_PRODUTOS) {
+        printf("\nNão foi possível copiar o produto, estoque cheio!\n");
+        return;
+    }
+
+    printf("Insira o ID do produto que deseja copiar: ");
+    scanf("%d", &id_original);
+    getchar();
+
+    int encontrado = 0;
+    for(id_copia=0; id_copia<*quant_estoque; id_copia++) {
+        if(estoque[id_copia].id == id_original) {
+            estoque[*quant_estoque] = estoque[id_copia];
+            estoque[*quant_estoque].id = *quant_estoque + 1;
+            (*quant_estoque)++;
+
+            printf("Produto clonado com sucesso. Novo ID: %d\n", *quant_estoque);
+            encontrado = 1;
+            break;
+        }
+    }
+    if(!encontrado) {
+        printf("ID não encontrado. Não foi possivel clonar o produto!\n");
+    }
 }
