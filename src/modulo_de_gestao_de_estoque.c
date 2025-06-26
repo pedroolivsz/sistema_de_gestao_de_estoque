@@ -294,18 +294,22 @@ void ordenarPorValorUnitario(produto estoque[], int quant_estoque) {
 }
 void relatorioDeEstoque(produto estoque[], int quant_estoque) {
     int item;
-    printf("\n========== Relatório de Estoque ==========\n");
-    printf("| ID |Nome                |Qtde |Valor Unit. |\n");
-    for(item=0; item<quant_estoque-1; item++) {
-        printf("| %-3d |%-20s| %5d | R$ %10.2f |\n", 
+    float valor_total;
+    printf("\n================== Relatório de Estoque ==================\n");
+    printf("| ID |Nome                |Qtde |Valor Unit. |Valor total |\n");
+    printf("|----|--------------------|-----|------------|------------|\n");
+    for(item=0; item<quant_estoque; item++) {
+        valor_total = estoque[item].quantidade*estoque[item].valor;
+        printf("| %-2d |%-20s| %3d | R$ %7.2f | R$ %7.2f |\n", 
         estoque[item].id,
         estoque[item].nome,
         estoque[item].quantidade,
-        estoque[item].valor);
+        estoque[item].valor,
+        valor_total);
     }
-    printf("------------------------------------------\n");
+    printf("-----------------------------------------------------------\n");
     printf("Quantidade de itens em estoque: %d\n", quant_estoque);
     printf("Valor total em estoque: R$%.2f\n", valorTotalEstoque(estoque, quant_estoque));
-    printf("==========================================\n");
+    printf("===========================================================\n");
     return;
 }
