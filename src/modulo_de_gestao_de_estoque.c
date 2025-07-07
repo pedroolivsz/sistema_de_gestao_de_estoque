@@ -338,6 +338,10 @@ void clonarProduto(produto estoque[], int *quant_estoque) {
             (*quant_estoque)++;
 
             printf("Produto clonado com sucesso. Novo ID: %d\n", *quant_estoque);
+            printf("|Nome: %s |Qtde: %d |Valor: R$%.2f |\n",
+                estoque[*quant_estoque-1].nome,
+                estoque[*quant_estoque-1].quantidade, 
+                estoque[*quant_estoque-1].valor);
             encontrado = 1;
             break;
         }
