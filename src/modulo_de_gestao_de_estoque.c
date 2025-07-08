@@ -1,8 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define MAX_PRODUTOS 50
-
+#define ARQUIVO "estoque.txt"
 typedef struct {
     int id;
     char nome[50];
@@ -10,6 +11,8 @@ typedef struct {
     float valor;
 }produto;
 
+void salvarEstoque(produto estoque[], int quant_estoque);
+void carregarEstoque(produto estoque[], int *quant_estoque);
 void adicionarProduto(produto estoque[], int *quant_estoque);
 void listarProdutos(produto estoque[], int quant_estoque);
 void excluirProduto(produto estoque[], int *quant_estoque);
@@ -25,9 +28,10 @@ void relatorioDeEstoque(produto estoque[], int quant_estoque);
 
 int main() {
     produto estoque[MAX_PRODUTOS];
-
     int opcao;
     int quantidade_estoque = 0;
+
+    carregarEstoque(estoque, &quantidade_estoque);
 
     do {
         printf("====== Menu ======\n");
@@ -85,35 +89,67 @@ int main() {
                 relatorioDeEstoque(estoque, quantidade_estoque);
                 break;
             case 0:
+                salvarEstoque(estoque, quantidade_estoque);
                 break;
             default:
                 printf("Função não encontrada. Tente novamente!\n");
                 break;
         }
-        
     } while(opcao!=0);
-
     printf("Encerrando programa...\n");
     printf("Programa finalizado!\n");
-
     return 0;
 }
-
+void salvarEstoque(produto estoque[], int quant_estoque) {
+    FILE *arquivo = fopen(ARQUIVO, "w");
+    int item;
+    if(arquivo == NULL) {
+        printf("Erro. O arquivo %s não foi encontado, impossível salvar o arquivo!\n", ARQUIVO);
+        return;
+    }
+    for(item=0; item<quant_estoque; item++) {
+        fprintf(arquivo, "%d;%s;%d;%2.f\n", 
+        estoque[item].id,
+        estoque[item].nome,
+        estoque[item].quantidade,
+        estoque[item].valor);
+    }
+    fclose(arquivo);
+    printf("Os dados foram salvos com sucesso em %s\n", ARQUIVO);
+    return;
+}
+void carregarEstoque(produto estoque[], int *quant_estoque) {
+    FILE *arquivo = fopen(ARQUIVO, "r");
+    *quant_estoque=0;
+    if(arquivo == NULL) {
+        printf("Erro. O arquivo %s não encontrado, nenhum dado encontrado.\n", ARQUIVO);
+        return;
+    }
+    while(fscanf(arquivo, "%d;%49[^;];%d;%f\n", 
+    &estoque[*quant_estoque].id,
+    estoque[*quant_estoque].nome,
+    &estoque[*quant_estoque].quantidade,
+    &estoque[*quant_estoque].valor)==4) {
+        (*quant_estoque)++;
+        if(*quant_estoque>=MAX_PRODUTOS)break;
+    }
+    fclose(arquivo);
+}
 void adicionarProduto(produto estoque[], int *quant_estoque) {
     if(*quant_estoque>=MAX_PRODUTOS) {
         printf("Estoque cheio!");
         return;
     }
-
     estoque[*quant_estoque].id = *quant_estoque + 1;
-
     printf("Insira o nome do produto: ");
     fgets(estoque[*quant_estoque].nome, 50, stdin);
     estoque[*quant_estoque].nome[strcspn(estoque[*quant_estoque].nome, "\n")] = '\0';
-
+    if(strlen(estoque[*quant_estoque].nome)==0 || strcspn(estoque[*quant_estoque].nome, " ")==strlen(estoque[*quant_estoque].nome)) {
+        printf("Nome inválido. O nome não pode estar vazio!\n");
+        return;
+    }
     printf("Insira a quantidade de produtos: ");
     scanf("%d", &estoque[*quant_estoque].quantidade);
-
     do { 
         printf("Insira o valor do produto: ");
         scanf("%f", &estoque[*quant_estoque].valor);
@@ -122,12 +158,10 @@ void adicionarProduto(produto estoque[], int *quant_estoque) {
             printf("\nValor invalido. Tente novamente!");
         }
     } while(estoque[*quant_estoque].valor < 0);
-
     printf("\nProduto adicionado com sucesso!\n");
     (*quant_estoque)++;
     return;
 }
-
 void listarProdutos(produto estoque[], int quant_estoque) {
     int id;
     if(quant_estoque==0) {
@@ -135,6 +169,7 @@ void listarProdutos(produto estoque[], int quant_estoque) {
         return;
     }
     for(id=0; id<quant_estoque; id++) {
+
         printf("===== Produto =====\n");
         printf("Nome: %s\n", estoque[id].nome);
         printf("Id: %d\n", estoque[id].id);
@@ -144,14 +179,11 @@ void listarProdutos(produto estoque[], int quant_estoque) {
     }  
     return;
 }
-
 void excluirProduto(produto estoque[], int *quant_estoque) {
     int id, item, encontrado=0;
-
     printf("Digite o id que deseja excluir: ");
     scanf("%d", &id);
     getchar();
-
     for(item=0; item<*quant_estoque; item++) {
         if(id==estoque[item].id) {
             encontrado = 1;
@@ -166,30 +198,25 @@ void excluirProduto(produto estoque[], int *quant_estoque) {
         estoque[mover] = estoque[mover+1];
     }
     (*quant_estoque)--;
+
     for(int new_id=0; new_id<*quant_estoque; new_id++) {
         estoque[new_id].id = new_id + 1;
     }
     printf("O produto foi excluido com sucesso!\n");
-
     return;
 }
-
 float valorTotalEstoque(produto estoque[], int quant_estoque) {
     float valor_total = 0.0;
     int id;
-
     for(id=0; id<quant_estoque; id++) {
         valor_total += estoque[id].valor * estoque[id].quantidade;
     }
-
     return valor_total;
 }
 void buscarPorId(produto estoque[], int quant_estoque) {
     int buscar_id, verificar_id, encontrado = 0;
-
     printf("Insira o id do produto: ");
     scanf("%d", &buscar_id);
-
     for(verificar_id=0; verificar_id<quant_estoque; verificar_id++) {
         if(estoque[verificar_id].id==buscar_id) {
             encontrado = 1;
@@ -216,7 +243,6 @@ void buscarPorNome(produto estoque[], int quant_estoque) {
     printf("Insira o nome do produto: ");
     fgets(nome, sizeof(nome), stdin);
     nome[strcspn(nome, "\n")] = '\0';
-
     for(indice=0; indice<quant_estoque; indice++) {
         if(strcmp(estoque[indice].nome, nome) == 0) {
             printf("\n===== Produto ID: %d =====\n", estoque[indice].id);
@@ -226,32 +252,41 @@ void buscarPorNome(produto estoque[], int quant_estoque) {
             printf("=========================\n\n");
             encontrado++;
         }
-        if(encontrado == 0) {
-            printf("\nNenhum produto com esse nome foi encontrado!\n");
-        }
+    }
+    if(encontrado == 0) {
+        printf("\nNenhum produto com esse nome foi encontrado!\n");
     }
     return;    
 }
-
 void editarProduto(produto estoque[], int quant_estoque) {
-    int id, item;
+    int id, item, encontrado=0;
     printf("Digite o id do produto: ");
     scanf("%d", &id);
-
     for(item=0; item<quant_estoque; item++) {
         if(estoque[item].id==id) {
-            getchar();
-            printf("Novo nome: ");
-            fgets(estoque[item].nome, 50, stdin);
-            estoque[item].nome[strcspn(estoque[item].nome, "\n")] = '\0';
-
-            printf("Nova quantidade: ");
-            scanf("%d", &estoque[item].quantidade);
-
-            printf("Novo valor: ");
-            scanf("%f", &estoque[item].valor);
+            encontrado = 1;
+            break;
         }
     }
+    if(encontrado==0) {
+        printf("Nenhum produto encontrado. Tente novamente!\n");
+        return;
+    }
+    if(encontrado==1) {
+        getchar();
+        printf("Novo nome: ");
+        fgets(estoque[item].nome, 50, stdin);
+        estoque[item].nome[strcspn(estoque[item].nome, "\n")] = '\0';
+        
+
+        printf("Nova quantidade: ");
+        scanf("%d", &estoque[item].quantidade);
+
+        printf("Novo valor: ");
+        scanf("%f", &estoque[item].valor);
+        
+    }
+
     printf("\nProduto atualizado com sucesso!\n");
     return;
 }
@@ -325,11 +360,9 @@ void clonarProduto(produto estoque[], int *quant_estoque) {
         printf("\nNão foi possível copiar o produto, estoque cheio!\n");
         return;
     }
-
     printf("Insira o ID do produto que deseja copiar: ");
     scanf("%d", &id_original);
     getchar();
-
     int encontrado = 0;
     for(id_copia=0; id_copia<*quant_estoque; id_copia++) {
         if(estoque[id_copia].id == id_original) {
