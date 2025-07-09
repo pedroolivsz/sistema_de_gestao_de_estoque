@@ -1,2 +1,6 @@
-1;Fone;1;100
-2;Tablet;1;451
+1;Fone;1;99.98
+2;Caderno;1;0.00
+3;Celular;1200;1.00
+4;Tablet;1;450.00
+5;Caixa de som;1;67.90
+6;Monitor;1;750.00

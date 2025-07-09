@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_PRODUTOS 50
 #define ARQUIVO "estoque.txt"
 typedef struct {
     int id;
@@ -12,11 +11,11 @@ typedef struct {
 }produto;
 
 void salvarEstoque(produto estoque[], int quant_estoque);
-void carregarEstoque(produto estoque[], int *quant_estoque);
-void adicionarProduto(produto estoque[], int *quant_estoque);
+void carregarEstoque(produto **estoque, int *quant_estoque, int *capacidade_estoque, int *ultimo_id);
+void adicionarProduto(produto **estoque, int *quant_estoque, int *capacidade_estoque, int *ultimo_id);
 void listarProdutos(produto estoque[], int quant_estoque);
 void excluirProduto(produto estoque[], int *quant_estoque);
-void clonarProduto(produto estoque[], int *quant_estoque);
+void clonarProduto(produto **estoque, int *quant_estoque, int *capacidade_estoque, int *ultimo_id);
 float valorTotalEstoque(produto estoque[], int quant_estoque);
 void buscarPorId(produto estoque[], int quant_estoque);
 void buscarPorNome(produto estoque[], int quant_estoque);
@@ -27,11 +26,20 @@ void ordenarPorValorUnitario(produto estoque[], int quant_estoque);
 void relatorioDeEstoque(produto estoque[], int quant_estoque);
 
 int main() {
-    produto estoque[MAX_PRODUTOS];
+    produto *estoque;
     int opcao;
     int quantidade_estoque = 0;
+    int capacidade_estoque = 5;
+    int ultimo_id = 0;
 
-    carregarEstoque(estoque, &quantidade_estoque);
+    estoque = malloc(capacidade_estoque*sizeof(produto));
+
+    if(estoque == NULL) {
+        printf("Erro. Não foi possivel alocar a memoria inicial!\n");
+        return 1;
+    }
+
+    carregarEstoque(&estoque, &quantidade_estoque, &capacidade_estoque, &ultimo_id);
 
     do {
         printf("====== Menu ======\n");
@@ -49,11 +57,15 @@ int main() {
         printf("12. Gerar relatório de estoque\n");
         printf("0. Encerrar programa\n");
         printf("===== Escolha: ");
-        scanf("%d", &opcao);
+        if(scanf("%d", &opcao) != 1) {
+            printf("Entrada invalida!\n");
+            while(getchar() != '\n');
+            continue;
+        }
         getchar();
         switch (opcao) {
             case 1:
-                adicionarProduto(estoque, &quantidade_estoque);
+                adicionarProduto(&estoque, &quantidade_estoque, &capacidade_estoque, &ultimo_id);
                 break;
             case 2:
                 listarProdutos(estoque, quantidade_estoque);
@@ -62,7 +74,7 @@ int main() {
                 excluirProduto(estoque, &quantidade_estoque);
                 break;
             case 4:
-                clonarProduto(estoque, &quantidade_estoque);
+                clonarProduto(&estoque, &quantidade_estoque, &capacidade_estoque, &ultimo_id);
                 break;
             case 5:
                 printf("Valor total em estoque: R$%.2f\n", valorTotalEstoque(estoque, quantidade_estoque));
@@ -97,6 +109,7 @@ int main() {
         }
     } while(opcao!=0);
     printf("Encerrando programa...\n");
+    free(estoque);
     printf("Programa finalizado!\n");
     return 0;
 }
@@ -108,7 +121,7 @@ void salvarEstoque(produto estoque[], int quant_estoque) {
         return;
     }
     for(item=0; item<quant_estoque; item++) {
-        fprintf(arquivo, "%d;%s;%d;%2.f\n", 
+        fprintf(arquivo, "%d;%s;%d;%.2f\n", 
         estoque[item].id,
         estoque[item].nome,
         estoque[item].quantidade,
@@ -118,51 +131,72 @@ void salvarEstoque(produto estoque[], int quant_estoque) {
     printf("Os dados foram salvos com sucesso em %s\n", ARQUIVO);
     return;
 }
-void carregarEstoque(produto estoque[], int *quant_estoque) {
+void carregarEstoque(produto **estoque, int *quant_estoque, int *capacidade_estoque, int *ultimo_id) {
     FILE *arquivo = fopen(ARQUIVO, "r");
     *quant_estoque=0;
     if(arquivo == NULL) {
         printf("Erro. O arquivo %s não encontrado, nenhum dado encontrado.\n", ARQUIVO);
         return;
     }
+    *quant_estoque = 0;
     while(fscanf(arquivo, "%d;%49[^;];%d;%f\n", 
-    &estoque[*quant_estoque].id,
-    estoque[*quant_estoque].nome,
-    &estoque[*quant_estoque].quantidade,
-    &estoque[*quant_estoque].valor)==4) {
+            &(*estoque)[*quant_estoque].id,
+            (*estoque)[*quant_estoque].nome,
+            &(*estoque)[*quant_estoque].quantidade,
+            &(*estoque)[*quant_estoque].valor)==4) {
+        if(*quant_estoque>=*capacidade_estoque) {
+            *capacidade_estoque *= 2;
+            produto *cap_temporaria = realloc(*estoque, (*capacidade_estoque)*sizeof(produto));
+            if(!cap_temporaria) {
+                printf("Erro ao realocar memória!\n");
+                fclose(arquivo);
+                return;
+            }
+            *estoque = cap_temporaria;
+        }
+        if((*estoque)[*quant_estoque].id >= *ultimo_id) {
+            (*ultimo_id) = (*estoque)[*quant_estoque].id;
+        }
         (*quant_estoque)++;
-        if(*quant_estoque>=MAX_PRODUTOS)break;
     }
     fclose(arquivo);
 }
-void adicionarProduto(produto estoque[], int *quant_estoque) {
-    if(*quant_estoque>=MAX_PRODUTOS) {
-        printf("Estoque cheio!");
-        return;
+void adicionarProduto(produto **estoque, int *quant_estoque, int *capacidade_estoque, int *ultimo_id) {
+    if(*quant_estoque>=*capacidade_estoque) {
+            *capacidade_estoque *= 2;
+            produto *cap_temporaria = realloc(*estoque, (*capacidade_estoque)*sizeof(produto));
+            if(!cap_temporaria) {
+                printf("Erro ao realocar memória!\n");
+                return;
+            }
+            *estoque = cap_temporaria;
     }
-    estoque[*quant_estoque].id = *quant_estoque + 1;
+    (*ultimo_id)++;
+    (*estoque)[*quant_estoque].id = *ultimo_id;
     printf("Insira o nome do produto: ");
-    fgets(estoque[*quant_estoque].nome, 50, stdin);
-    estoque[*quant_estoque].nome[strcspn(estoque[*quant_estoque].nome, "\n")] = '\0';
-    if(strlen(estoque[*quant_estoque].nome)==0 || strcspn(estoque[*quant_estoque].nome, " ")==strlen(estoque[*quant_estoque].nome)) {
-        printf("Nome inválido. O nome não pode estar vazio!\n");
+    fgets((*estoque)[*quant_estoque].nome, sizeof((*estoque)[*quant_estoque].nome), stdin);
+    (*estoque)[*quant_estoque].nome[strcspn((*estoque)[*quant_estoque].nome, "\n")] = '\0';
+    printf("Insira a quantidade de produtos: ");
+    if(scanf("%d", &(*estoque)[*quant_estoque].quantidade) != 1 || (*estoque)[*quant_estoque].quantidade < 0) {
+        printf("Quantidade invalida!\n");
+        while(getchar() != '\n');
         return;
     }
-    printf("Insira a quantidade de produtos: ");
-    scanf("%d", &estoque[*quant_estoque].quantidade);
+    while(getchar() != '\n');
     do { 
         printf("Insira o valor do produto: ");
-        scanf("%f", &estoque[*quant_estoque].valor);
+        scanf("%f", &(*estoque)[*quant_estoque].valor);
         getchar();
-        if(estoque[*quant_estoque].valor<0) {
+        if((*estoque)[*quant_estoque].valor<0) {
             printf("\nValor invalido. Tente novamente!");
         }
-    } while(estoque[*quant_estoque].valor < 0);
+    } while((*estoque)[*quant_estoque].valor < 0);
     printf("\nProduto adicionado com sucesso!\n");
     (*quant_estoque)++;
+    salvarEstoque(*estoque, *quant_estoque);
     return;
 }
-void listarProdutos(produto estoque[], int quant_estoque) {
+void listarProdutos(produto *estoque, int quant_estoque) {
     int id;
     if(quant_estoque==0) {
         printf("Estoque vazio!\n");
@@ -198,11 +232,8 @@ void excluirProduto(produto estoque[], int *quant_estoque) {
         estoque[mover] = estoque[mover+1];
     }
     (*quant_estoque)--;
-
-    for(int new_id=0; new_id<*quant_estoque; new_id++) {
-        estoque[new_id].id = new_id + 1;
-    }
     printf("O produto foi excluido com sucesso!\n");
+    salvarEstoque(estoque, *quant_estoque);
     return;
 }
 float valorTotalEstoque(produto estoque[], int quant_estoque) {
@@ -288,6 +319,7 @@ void editarProduto(produto estoque[], int quant_estoque) {
     }
 
     printf("\nProduto atualizado com sucesso!\n");
+    salvarEstoque(estoque, quant_estoque);
     return;
 }
 void ordenarPorNome(produto estoque[], int quant_estoque) {
@@ -302,6 +334,7 @@ void ordenarPorNome(produto estoque[], int quant_estoque) {
         }
     }
     printf("\nProdutos ordenados por nome!\n\n");
+    salvarEstoque(estoque, quant_estoque);
     return;
 }
 void ordenarPorQuantidade(produto estoque[], int quant_estoque) {
@@ -316,6 +349,7 @@ void ordenarPorQuantidade(produto estoque[], int quant_estoque) {
         }
     }
     printf("\nProdutos ordenados com sucesso!\n\n");
+    salvarEstoque(estoque, quant_estoque);
     return;
 }
 void ordenarPorValorUnitario(produto estoque[], int quant_estoque) {
@@ -330,6 +364,7 @@ void ordenarPorValorUnitario(produto estoque[], int quant_estoque) {
         }
     }
     printf("\nProdutos ordenados com sucesso!\n\n");
+    salvarEstoque(estoque, quant_estoque);
     return;
 }
 void relatorioDeEstoque(produto estoque[], int quant_estoque) {
@@ -353,28 +388,33 @@ void relatorioDeEstoque(produto estoque[], int quant_estoque) {
     printf("===========================================================\n");
     return;
 }
-void clonarProduto(produto estoque[], int *quant_estoque) {
+void clonarProduto(produto **estoque, int *quant_estoque, int *capacidade_estoque, int *ultimo_id) {
     int id_original, id_copia;
-
-    if(*quant_estoque >= MAX_PRODUTOS) {
-        printf("\nNão foi possível copiar o produto, estoque cheio!\n");
-        return;
+    if((*quant_estoque)>=(*capacidade_estoque)) {
+        *capacidade_estoque *= 2;
+        produto *estoque_temprario = realloc(*estoque, (*capacidade_estoque)*sizeof(produto));
+        if(!estoque_temprario) {
+            printf("Erro ao realocar memoria!\n");
+            return;
+        }
+        *estoque = estoque_temprario;
     }
     printf("Insira o ID do produto que deseja copiar: ");
     scanf("%d", &id_original);
     getchar();
     int encontrado = 0;
     for(id_copia=0; id_copia<*quant_estoque; id_copia++) {
-        if(estoque[id_copia].id == id_original) {
-            estoque[*quant_estoque] = estoque[id_copia];
-            estoque[*quant_estoque].id = *quant_estoque + 1;
+        if((*estoque)[id_copia].id == id_original) {
+            (*estoque)[*quant_estoque] = (*estoque)[id_copia];
+            (*ultimo_id)++;
+            (*estoque)[*quant_estoque].id = *ultimo_id;
             (*quant_estoque)++;
 
             printf("Produto clonado com sucesso. Novo ID: %d\n", *quant_estoque);
             printf("|Nome: %s |Qtde: %d |Valor: R$%.2f |\n",
-                estoque[*quant_estoque-1].nome,
-                estoque[*quant_estoque-1].quantidade, 
-                estoque[*quant_estoque-1].valor);
+                (*estoque)[*quant_estoque-1].nome,
+                (*estoque)[*quant_estoque-1].quantidade, 
+                (*estoque)[*quant_estoque-1].valor);
             encontrado = 1;
             break;
         }
@@ -382,4 +422,6 @@ void clonarProduto(produto estoque[], int *quant_estoque) {
     if(!encontrado) {
         printf("ID não encontrado. Não foi possivel clonar o produto!\n");
     }
+    salvarEstoque(*estoque, *quant_estoque);
+    return;
 }
