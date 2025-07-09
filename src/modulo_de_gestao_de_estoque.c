@@ -3,12 +3,20 @@
 #include <string.h>
 
 #define ARQUIVO "estoque.txt"
+#define USER "Admin"
+#define PASSWORD "1234"
+#define MAX_TENTATIVAS 3
 typedef struct {
     int id;
     char nome[50];
     int quantidade;
     float valor;
-}produto;
+} produto;
+
+typedef struct {
+    char usuario[32];
+    char senha[8];
+} User;
 
 void salvarEstoque(produto estoque[], int quant_estoque);
 void carregarEstoque(produto **estoque, int *quant_estoque, int *capacidade_estoque, int *ultimo_id);
@@ -25,7 +33,38 @@ void ordenarPorQuantidade(produto estoque[], int quant_estoque);
 void ordenarPorValorUnitario(produto estoque[], int quant_estoque);
 void relatorioDeEstoque(produto estoque[], int quant_estoque);
 
+int login() {
+    int quantidadeTentavivas = 0;
+    User administrador;
+
+    while(quantidadeTentavivas<MAX_TENTATIVAS) {
+        printf("Insira seu usuário: ");
+        fgets(administrador.usuario, sizeof(administrador.usuario), stdin);
+        administrador.usuario[strcspn(administrador.usuario, "\n")] = '\0';
+
+        printf("Insira sua senha: ");
+        fgets(administrador.senha, sizeof(administrador.senha), stdin);
+        administrador.senha[strcspn(administrador.senha, "\n")] = '\0';
+
+        if(strcmp(administrador.usuario, USER) == 0 && strcmp(administrador.senha, PASSWORD) == 0) {
+            printf("Login bem sucedido!\n");
+            return 1;
+        }
+        else{
+            quantidadeTentavivas++;
+            printf("Credenciais inválidas, tentativa número %d.", quantidadeTentavivas);
+        }
+    }
+    printf("O número de tentativas se esgotou, tente novamente mais tarde!\n");
+    return 0;
+}
+
 int main() {
+
+    if(!login()) {
+        return 1;
+    }
+
     produto *estoque;
     int opcao;
     int quantidade_estoque = 0;
@@ -42,7 +81,9 @@ int main() {
     carregarEstoque(&estoque, &quantidade_estoque, &capacidade_estoque, &ultimo_id);
 
     do {
-        printf("====== Menu ======\n");
+        printf("========================================================\n");
+        printf("                    Menu de funções                     \n");
+        printf("========================================================\n");
         printf("1. Adicionar produto\n");
         printf("2. Listar produtos\n");
         printf("3. Remover produto\n");
@@ -56,13 +97,15 @@ int main() {
         printf("11. Ordenar produtos do menor para o maior valor\n");
         printf("12. Gerar relatório de estoque\n");
         printf("0. Encerrar programa\n");
-        printf("===== Escolha: ");
+        printf("--------------------------------------------------------\n");
+        printf("Escolha: ");
         if(scanf("%d", &opcao) != 1) {
             printf("Entrada invalida!\n");
             while(getchar() != '\n');
             continue;
         }
         getchar();
+        printf("--------------------------------------------------------\n");
         switch (opcao) {
             case 1:
                 adicionarProduto(&estoque, &quantidade_estoque, &capacidade_estoque, &ultimo_id);
