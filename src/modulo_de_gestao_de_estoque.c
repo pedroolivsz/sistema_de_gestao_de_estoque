@@ -3,8 +3,6 @@
 #include <string.h>
 
 #define ARQUIVO "estoque.txt"
-#define USER "Admin"
-#define PASSWORD "1234"
 #define MAX_TENTATIVAS 3
 typedef struct {
     int id;
@@ -14,14 +12,16 @@ typedef struct {
 } produto;
 
 typedef struct {
-    char usuario[32];
-    char senha[8];
-} User;
+    char usuario[30];
+    char senha[30];
+    char perfil[15];
+} Conta;
 
 void salvarEstoque(produto estoque[], int quant_estoque);
 void carregarEstoque(produto **estoque, int *quant_estoque, int *capacidade_estoque, int *ultimo_id);
+void exibirMenu(char *perfil);
 void adicionarProduto(produto **estoque, int *quant_estoque, int *capacidade_estoque, int *ultimo_id);
-void listarProdutos(produto estoque[], int quant_estoque);
+void listarProdutos(produto *estoque, int quant_estoque);
 void excluirProduto(produto estoque[], int *quant_estoque);
 void clonarProduto(produto **estoque, int *quant_estoque, int *capacidade_estoque, int *ultimo_id);
 float valorTotalEstoque(produto estoque[], int quant_estoque);
@@ -33,35 +33,49 @@ void ordenarPorQuantidade(produto estoque[], int quant_estoque);
 void ordenarPorValorUnitario(produto estoque[], int quant_estoque);
 void relatorioDeEstoque(produto estoque[], int quant_estoque);
 
-int login() {
+int login(Conta usuarios[], int totalUsuarios, char perfilConectado[15]) {
+    char usuario[30], senha[30];
+    int autenticado = 0;
     int quantidadeTentavivas = 0;
-    User administrador;
-
+    
     while(quantidadeTentavivas<MAX_TENTATIVAS) {
-        printf("Insira seu usuário: ");
-        fgets(administrador.usuario, sizeof(administrador.usuario), stdin);
-        administrador.usuario[strcspn(administrador.usuario, "\n")] = '\0';
+        printf("Usuário: ");
+        fgets(usuario, sizeof(usuario), stdin);
+        usuario[strcspn(usuario, "\n")] = '\0';
 
-        printf("Insira sua senha: ");
-        fgets(administrador.senha, sizeof(administrador.senha), stdin);
-        administrador.senha[strcspn(administrador.senha, "\n")] = '\0';
-
-        if(strcmp(administrador.usuario, USER) == 0 && strcmp(administrador.senha, PASSWORD) == 0) {
+        printf("Senha: ");
+        fgets(senha, sizeof(senha), stdin);
+        senha[strcspn(senha, "\n")] = '\0';
+        for(int i=0; i<totalUsuarios; i++) {
+            if(strcmp(usuario, usuarios[i].usuario) == 0 && strcmp(senha, usuarios[i].senha) == 0) {
+                strcpy(perfilConectado, usuarios[i].perfil);
+                autenticado = 1;
+                break;
+            }
+        }
+        if(autenticado) {
             printf("Login bem sucedido!\n");
             return 1;
         }
         else{
             quantidadeTentavivas++;
-            printf("Credenciais inválidas, tentativa número %d.", quantidadeTentavivas);
+            printf("Credenciais inválidas, tentativa número %d.\n", quantidadeTentavivas);
         }
     }
-    printf("O número de tentativas se esgotou, tente novamente mais tarde!\n");
+    printf("Não foi possível fazer login, número máximo de tentativas alcançadas!\n");
     return 0;
 }
 
 int main() {
+    Conta usuarios[] = {
+        {"admin", "admin123", "admin"},
+        {"gerente", "gerente123", "gerente"},
+        {"usuario", "usuario123", "usuario"}
+    };
+    int totalUsuarios = 3;
+    char perfilConectado[15];
 
-    if(!login()) {
+    if(!login(usuarios, totalUsuarios, perfilConectado)) {
         return 1;
     }
 
@@ -81,24 +95,7 @@ int main() {
     carregarEstoque(&estoque, &quantidade_estoque, &capacidade_estoque, &ultimo_id);
 
     do {
-        printf("========================================================\n");
-        printf("                    Menu de funções                     \n");
-        printf("========================================================\n");
-        printf("1. Adicionar produto\n");
-        printf("2. Listar produtos\n");
-        printf("3. Remover produto\n");
-        printf("4. Clonar produto\n");
-        printf("5. Calcular valor total do estoque\n");
-        printf("6. Buscar produto por id\n");
-        printf("7. Buscar produto por nome\n");
-        printf("8. Editar produto\n");
-        printf("9. Ordenar produtos por nome\n");
-        printf("10. Ordenar produtos por quantidade em ordem crescente\n");
-        printf("11. Ordenar produtos do menor para o maior valor\n");
-        printf("12. Gerar relatório de estoque\n");
-        printf("0. Encerrar programa\n");
-        printf("--------------------------------------------------------\n");
-        printf("Escolha: ");
+        exibirMenu(perfilConectado);
         if(scanf("%d", &opcao) != 1) {
             printf("Entrada invalida!\n");
             while(getchar() != '\n');
@@ -108,16 +105,25 @@ int main() {
         printf("--------------------------------------------------------\n");
         switch (opcao) {
             case 1:
-                adicionarProduto(&estoque, &quantidade_estoque, &capacidade_estoque, &ultimo_id);
+                if(strcmp(perfilConectado, "admin")==0)
+                    adicionarProduto(&estoque, &quantidade_estoque, &capacidade_estoque, &ultimo_id);
+                else
+                    printf("Você não possui permição para acessar essa função.\n");
                 break;
             case 2:
                 listarProdutos(estoque, quantidade_estoque);
                 break;
             case 3:
-                excluirProduto(estoque, &quantidade_estoque);
+                if(strcmp(perfilConectado, "admin")==0 || strcmp(perfilConectado, "gerente")==0)
+                    excluirProduto(estoque, &quantidade_estoque);
+                else
+                    printf("Você não possui permição para acessar essa função.\n");
                 break;
             case 4:
-                clonarProduto(&estoque, &quantidade_estoque, &capacidade_estoque, &ultimo_id);
+                if(strcmp(perfilConectado, "admin")==0 || strcmp(perfilConectado, "gerente")==0)
+                    clonarProduto(&estoque, &quantidade_estoque, &capacidade_estoque, &ultimo_id);
+                else
+                    printf("Você não possui permição para acessar essa função.\n");
                 break;
             case 5:
                 printf("Valor total em estoque: R$%.2f\n", valorTotalEstoque(estoque, quantidade_estoque));
@@ -132,13 +138,22 @@ int main() {
                 editarProduto(estoque, quantidade_estoque);
                 break;
             case 9:
-                ordenarPorNome(estoque, quantidade_estoque);
+                if(strcmp(perfilConectado, "admin")==0 || strcmp(perfilConectado, "gerente")==0)
+                    ordenarPorNome(estoque, quantidade_estoque);
+                else
+                    printf("Você não possui permição para acessar essa função.\n");
                 break;
             case 10:
-                ordenarPorQuantidade(estoque, quantidade_estoque);
+                if(strcmp(perfilConectado, "admin")==0 || strcmp(perfilConectado, "gerente")==0)
+                    ordenarPorQuantidade(estoque, quantidade_estoque);
+                else
+                    printf("Você não possui permição para acessar essa função.\n");
                 break;
             case 11:
-                ordenarPorValorUnitario(estoque, quantidade_estoque);
+                if(strcmp(perfilConectado, "admin")==0 || strcmp(perfilConectado, "gerente")==0)
+                    ordenarPorValorUnitario(estoque, quantidade_estoque);
+                else
+                    printf("Você não possui permição para acessar essa função.\n");
                 break;
             case 12:
                 relatorioDeEstoque(estoque, quantidade_estoque);
@@ -203,6 +218,27 @@ void carregarEstoque(produto **estoque, int *quant_estoque, int *capacidade_esto
         (*quant_estoque)++;
     }
     fclose(arquivo);
+}
+void exibirMenu(char *perfil) {
+    printf("========================================================\n");
+    printf("                    Menu de funções                     \n");
+    printf("========================================================\n");
+    printf("1. Adicionar produto%s\n", strcmp(perfil, "admin")==0 ? "": "(Acesso negado)");
+    printf("2. Listar produtos\n");
+    printf("3. Remover produto%s\n", strcmp(perfil, "admin")==0||strcmp(perfil, "gerente")==0 ? "": "(Acesso negado)");
+    printf("4. Clonar produto%s\n", strcmp(perfil, "admin")==0||strcmp(perfil, "gerente")==0 ? "": "(Acesso negado)");
+    printf("5. Calcular valor total do estoque\n");
+    printf("6. Buscar produto por id\n");
+    printf("7. Buscar produto por nome\n");
+    printf("8. Editar produto%s\n", strcmp(perfil, "admin")==0||strcmp(perfil, "gerente")==0 ? "": "(Acesso negado)");
+    printf("9. Ordenar produtos por nome%s\n", strcmp(perfil, "admin")==0||strcmp(perfil, "gerente")==0 ? "": "(Acesso negado)");
+    printf("10. Ordenar produtos por quantidade em ordem crescente%s\n", strcmp(perfil, "admin")==0||strcmp(perfil, "gerente")==0 ? "": "(Acesso negado)");
+    printf("11. Ordenar produtos do menor para o maior valor%s\n", strcmp(perfil, "admin")==0||strcmp(perfil, "gerente")==0 ? "": "(Acesso negado)");
+    printf("12. Gerar relatório de estoque%s\n", strcmp(perfil, "admin")==0||strcmp(perfil, "gerente")==0 ? "": "(Acesso negado)");
+    printf("0. Encerrar programa%s\n", strcmp(perfil, "admin")==0||strcmp(perfil, "gerente")==0 ? "": "(Acesso negado)");
+    printf("--------------------------------------------------------\n");
+    printf("Escolha: ");
+    return;
 }
 void adicionarProduto(produto **estoque, int *quant_estoque, int *capacidade_estoque, int *ultimo_id) {
     if(*quant_estoque>=*capacidade_estoque) {
