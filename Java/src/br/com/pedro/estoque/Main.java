@@ -1,7 +1,6 @@
 package br.com.pedro.estoque;
 
 import br.com.pedro.estoque.model.Estoque;
-import br.com.pedro.estoque.model.Produto;
 
 import java.util.Scanner;
 
@@ -9,7 +8,7 @@ public class Main {
     public static void main(String[] args) {
         Estoque estoque = new Estoque();
         Scanner scan = new Scanner(System.in);
-        int opcao = 0;
+        int opcao;
 
         do {
             System.out.println("======================");
@@ -18,6 +17,7 @@ public class Main {
             System.out.println("1. Adicionar Produtos");
             System.out.println("2. Listar Produtos");
             System.out.println("3. Remover Produto");
+            System.out.println("4. Editar produto");
             System.out.println("0. Sair");
             System.out.println("======================");
             System.out.print("Escolha: ");
@@ -26,17 +26,18 @@ public class Main {
             scan.nextLine();
             switch(opcao) {
                 case 1:
-                    System.out.println("ID: ");
-                    int id = scan.nextInt();
-                    scan.nextLine();
-                    System.out.println("Nome: ");
+                    System.out.print("Nome: ");
                     String nome = scan.nextLine();
-                    System.out.println("Quantidade: ");
+
+                    System.out.print("Quantidade: ");
                     int quantidade = scan.nextInt();
-                    System.out.println("Preço unitário: ");
-                    double preco = scan.nextDouble();
-                    Produto novo = new Produto(id, nome, quantidade, preco);
-                    estoque.adicionarProduto(novo);
+
+                    System.out.print("Preço unitário: ");
+                    String precoStr = scan.next().replace(",", ".");
+                    double preco = Double.parseDouble(precoStr);
+                    scan.nextLine();
+
+                    estoque.adicionarProduto(nome, quantidade, preco);
                     break;
                 case 2:
                     estoque.listarProdutos();
@@ -45,6 +46,11 @@ public class Main {
                     System.out.print("Insira o ID a ser removido: ");
                     int idRemover = scan.nextInt();
                     estoque.removerProduto(idRemover);
+                    break;
+                case 4:
+                    System.out.print("Insira o ID do produto a ser editado: ");
+                    int editarId = scan.nextInt();
+                    estoque.editarProduto(editarId, scan);
                     break;
                 case 0:
                     System.out.println("Encerrando sistema...");
