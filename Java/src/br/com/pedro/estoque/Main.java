@@ -18,6 +18,7 @@ public class Main {
             System.out.println("2. Listar Produtos");
             System.out.println("3. Remover Produto");
             System.out.println("4. Editar produto");
+            System.out.println("5. Buscar por nome");
             System.out.println("0. Sair");
             System.out.println("======================");
             System.out.print("Escolha: ");
@@ -52,6 +53,10 @@ public class Main {
                     int editarId = scan.nextInt();
                     estoque.editarProduto(editarId, scan);
                     break;
+                case 5:
+                    System.out.print("Insira o nome que deseja encontrar: ");
+                    String buscarNome = scan.nextLine();
+                    estoque.buscarPorNome(buscarNome);
                 case 0:
                     System.out.println("Encerrando sistema...");
                     break;

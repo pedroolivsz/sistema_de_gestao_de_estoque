@@ -104,4 +104,16 @@ public class Estoque {
         }
         System.out.println("✅Produto alterado com sucesso!");
     }
+    public void buscarPorNome(String buscarNome) {
+        boolean encontrado = false;
+        for(Produto p : produtos) {
+            if(p.getNome().toLowerCase().contains(buscarNome.toLowerCase())) {
+                System.out.println(p);
+                encontrado = true;
+            }
+        }
+        if(!encontrado) {
+            System.out.println("O item não foi encontrado!");
+        }
+    }
 }
