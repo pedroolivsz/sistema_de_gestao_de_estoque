@@ -18,7 +18,7 @@ public class Estoque {
     public void adicionarProduto(String nome, int quantidade, double preco) {
         Produto item = new Produto(proximoId, nome, quantidade, preco);
         produtos.add(item);
-        System.out.println("Produto adicionado com sucesso!");
+        System.out.println("\uD83D\uDCE6 Produto adicionado com sucesso!");
         proximoId++;
     }
     public void listarProdutos() {

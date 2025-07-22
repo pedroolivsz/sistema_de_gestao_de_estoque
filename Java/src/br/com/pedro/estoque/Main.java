@@ -2,6 +2,7 @@ package br.com.pedro.estoque;
 
 import br.com.pedro.estoque.model.Estoque;
 import br.com.pedro.estoque.model.Produto;
+import br.com.pedro.estoque.util.InputHelper;
 
 import java.util.Scanner;
 
@@ -26,22 +27,15 @@ public class Main {
             System.out.println("9. Ordenar por preço");
             System.out.println("0. Sair");
             System.out.println("======================");
-            System.out.print("Escolha: ");
-            opcao = scan.nextInt();
+            opcao = InputHelper.lerInt("Escolha: ");
             System.out.println("======================");
-            scan.nextLine();
             switch(opcao) {
                 case 1:
-                    System.out.print("Nome: ");
-                    String nome = scan.nextLine();
+                    String nome = InputHelper.lerString("Nome: ");
 
-                    System.out.print("Quantidade: ");
-                    int quantidade = scan.nextInt();
+                    int quantidade = InputHelper.lerInt("Quantidade: ");
 
-                    System.out.print("Preço unitário: ");
-                    String precoStr = scan.next().replace(",", ".");
-                    double preco = Double.parseDouble(precoStr);
-                    scan.nextLine();
+                    double preco = InputHelper.lerDouble("Preço unitário: ");
 
                     estoque.adicionarProduto(nome, quantidade, preco);
                     break;
@@ -49,10 +43,8 @@ public class Main {
                     estoque.listarProdutos();
                     break;
                 case 3:
-                    System.out.print("Insira o ID a ser removido: ");
-                    int idRemover = scan.nextInt();
-                    System.out.printf("Tem certeza que deseja remover o produto de ID: %d", idRemover);
-                    String confirmar = scan.next();
+                    int idRemover = InputHelper.lerInt("Insira o ID a ser removido: ");
+                    String confirmar = InputHelper.lerConfirmacao("Tem certeza que deseja remover o produto de ID: " + idRemover + "?");
                     if(confirmar.equalsIgnoreCase("s")) {
                         estoque.removerProduto(idRemover);
                     } else {
@@ -60,60 +52,51 @@ public class Main {
                     }
                     break;
                 case 4:
-                    System.out.print("Insira o ID do produto a ser editado: ");
-                    int editarId = scan.nextInt();
+                    int editarId = InputHelper.lerInt("Insira o ID do produto a ser editado: ");
+
                     Produto produtoAtual = estoque.buscarPorId(editarId);
+
                     if(produtoAtual == null) {
                         System.out.println("❌ Produto não encontrado!");
                         break;
                     }
+
                     String novoNome = produtoAtual.getNome();
                     int novaQuantidade = produtoAtual.getQuantidade();
                     double novoPreco = produtoAtual.getPreco();
+
                     System.out.println("==============================");
                     System.out.println("1. Editar nome");
                     System.out.println("2. Editar quantidade");
                     System.out.println("3. Editar preço");
                     System.out.println("4. Editar todos os atributos");
                     System.out.println("==============================");
-                    System.out.print("Escolha: ");
-                    int escolha = scan.nextInt();
-                    scan.nextLine();
-                    String strPreco;
+                    int escolha = InputHelper.lerInt("Escolha: ");
+
                     switch(escolha) {
                         case 1:
-                            System.out.print("Editar nome:");
-                            novoNome = scan.nextLine();
+                            novoNome = InputHelper.lerString("Editar nome: ");
                             break;
                         case 2:
-                            System.out.print("Editar quantidade: ");
-                            novaQuantidade = scan.nextInt();
+                            novaQuantidade = InputHelper.lerInt("Editar quantidade: ");
                             break;
                         case 3:
-                            System.out.print("Editar preço: ");
-                            strPreco = scan.next().replace(",", ".");
-                            novoPreco = Double.parseDouble(strPreco);
+                            novoPreco = InputHelper.lerDouble("Editar preço: ");
                             break;
                         case 4:
-                            System.out.print("Editar nome:");
-                            novoNome = scan.nextLine();
-
-                            System.out.print("Editar quantidade: ");
-                            novaQuantidade = scan.nextInt();
-
-                            System.out.print("Editar preço: ");
-                            strPreco = scan.next().replace(",", ".");
-                            novoPreco = Double.parseDouble(strPreco);
+                            novoNome = InputHelper.lerString("Editar nome: ");
+                            novaQuantidade = InputHelper.lerInt("Editar quantidade: ");
+                            novoPreco = InputHelper.lerDouble("Editar preço: ");
                             break;
                         default:
                             System.out.println("Opção inválida.");
                             break;
                     }
+
                     estoque.editarProduto(editarId, novoNome, novaQuantidade, novoPreco);
                     break;
                 case 5:
-                    System.out.print("Insira o nome que deseja encontrar: ");
-                    String buscarNome = scan.nextLine();
+                    String buscarNome = InputHelper.lerString("Insira o nome que deseja encontrar: ");
                     estoque.buscarPorNome(buscarNome);
                     break;
                 case 6:
