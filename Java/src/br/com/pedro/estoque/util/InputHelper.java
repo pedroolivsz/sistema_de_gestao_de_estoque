@@ -1,11 +1,13 @@
 package br.com.pedro.estoque.util;
 
+import br.com.pedro.estoque.view.MenuView;
+
 import java.util.Scanner;
 
 public class InputHelper {
     private static final Scanner scan = new Scanner(System.in);
 
-    public static String lerString(String mensagem) {
+    /*public static String lerString(String mensagem) {
         String entrada;
         do {
             System.out.print(mensagem);
@@ -15,27 +17,15 @@ public class InputHelper {
             }
         } while(entrada.isEmpty());
         return entrada;
-    }
+    }*/
 
     public static String lerNome(String mensagem) {
-        while(true) {
+        String nome;
+        do {
             System.out.print(mensagem);
-            String nome = scan.nextLine().trim();
-
-            if(nome.isEmpty()) {
-                System.out.println("❌ O campo não pode estar vazio.");
-            } else if(nome.length() < 2) {
-                System.out.println("❌ O nome deve conter pelo menos 2 caracteres.");
-            } else if(nome.matches("\\d+")) {
-                System.out.println("❌ O nome não deve conter somente números.");
-            } else if(!nome.matches("[A-Za-zÀ-ÖØ-öø-ÿ0-9 ]+")) {
-                System.out.println("❌ O nome contém caracteres inaválidos.");
-            } else if(!Character.isLetter(nome.charAt(0))) {
-                System.out.println("❌ O nome não deve começar com um número.");
-            } else {
-                return nome;
-            }
-        }
+            nome = scan.nextLine().trim();
+        } while(!Validador.validarNome(nome));
+        return nome;
     }
 
     public static int lerInt(String mensagem) {
@@ -44,13 +34,11 @@ public class InputHelper {
             if(scan.hasNextInt()) {
                 int quantidade = scan.nextInt();
                 scan.nextLine();
-                if(quantidade >= 0) {
+                if(Validador.validarInt(quantidade)) {
                     return quantidade;
-                } else {
-                    System.out.println("❌ O valor não poder ser negativo.");
                 }
             } else {
-                System.out.println("❌ Valor inválido. Insira um valor inteiro!");
+                MenuView.exibirMensagemErro("Valor inválido. Insira um valor inteiro!");
                 scan.nextLine();
             }
         }
