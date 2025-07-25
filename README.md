@@ -38,14 +38,14 @@ java -cp .;gson-2.10.1.jar src/Main
 
 ## 📂 Estrutura do projeto
 
-sistema_de_gestao_de_estoque/
-├── src/
-│   ├── model/        # Classe Produto e Estoque
-│   ├── controller/   # Classe EstoqueController
-│   ├── view/         # Interface de menus
-│   ├── util/         # ArquivoHelper, Validador e InputHelper
-│   └── Main.java     # Ponto de entrada do sistema
-├── estoque.json      # Arquivo onde os produtos são salvos
+sistema_de_gestao_de_estoque/<br>
+├── src/<br>
+│   ├── model/        # Classe Produto e Estoque<br>
+│   ├── controller/   # Classe EstoqueController<br>
+│   ├── view/         # Interface de menus<br>
+│   ├── util/         # ArquivoHelper, Validador e InputHelper<br>
+│   └── Main.java     # Ponto de entrada do sistema<br>
+├── estoque.json      # Arquivo onde os produtos são salvos<br>
 └── README.md
 
 ---
@@ -62,10 +62,10 @@ sistema_de_gestao_de_estoque/
 
 ## 👨‍💻 Autor
 
-Desenvolvido por Joao Pedro
-Como parte dos estudo de Java, POO e estruturas de software.
+Desenvolvido por Joao Pedro <br>
+Como parte dos estudo de Java, POO e estruturas de software. <br>
 Se gostou, ⭐ deixe uma estrela no repositório!
 
 ---
 
-**Este projeto foi feito com 💙 para fins educacionais!
+**Este projeto foi feito com 💙 para fins educacionais!**
