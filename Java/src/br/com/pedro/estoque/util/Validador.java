@@ -14,7 +14,7 @@ public class Validador {
             MenuView.exibirMensagemErro("O nome não pode conter apenas números.");
             return false;
         } else if(!nome.matches("[A-Za-zÀ-ÖØ-öø-ÿ0-9 ]+")) {
-            MenuView.exibirMensagemErro("O nome possui caracteres inválidos");
+            MenuView.exibirMensagemErro("O nome deve conter apenas letras, números e espaços.");
             return false;
         } else if(!Character.isLetter(nome.charAt(0))) {
             MenuView.exibirMensagemErro("O nome não pode começar com números.");
@@ -26,6 +26,9 @@ public class Validador {
     public static boolean validarInt(int inteiro) {
         if(inteiro < 0) {
             MenuView.exibirMensagemErro("A valor não pode ser negativo");
+            return false;
+        } if(inteiro > 99999) {
+            MenuView.exibirMensagemErro("Número muito grande.");
             return false;
         }
         return true;

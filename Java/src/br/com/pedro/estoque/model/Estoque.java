@@ -1,13 +1,25 @@
 package br.com.pedro.estoque.model;
 
+import br.com.pedro.estoque.util.ArquivoHelper;
 import br.com.pedro.estoque.view.MenuView;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 
 public class Estoque {
-    private final ArrayList<Produto> produtos = new ArrayList<>();
+    private final ArrayList<Produto> produtos;
     private int proximoId = 1;
+
+    public Estoque() {
+        this.produtos = ArquivoHelper.carregarProdutos();
+        if(!produtos.isEmpty()) {
+            proximoId = produtos.stream().mapToInt(Produto::getId).max().getAsInt() + 1;
+        }
+    }
+
+    public void salvarProdutos() {
+        ArquivoHelper.salvarArquivo(produtos);
+    }
 
     public Produto buscarPorId(int id) {
         for(Produto item : produtos) {
@@ -20,6 +32,7 @@ public class Estoque {
     public void adicionarProduto(String nome, int quantidade, double preco) {
         Produto item = new Produto(proximoId, nome, quantidade, preco);
         produtos.add(item);
+        salvarProdutos();
         System.out.println("\uD83D\uDCE6 Produto adicionado com sucesso!");
         proximoId++;
     }
@@ -36,6 +49,7 @@ public class Estoque {
         Produto encontrado = buscarPorId(id);
         if(encontrado != null) {
             produtos.remove(encontrado);
+            salvarProdutos();
             MenuView.exibirMensagemSucesso("Produto removido com sucesso!");
         } else {
             MenuView.exibirMensagemErro("Produto não encontrado.");
@@ -50,6 +64,7 @@ public class Estoque {
         produtoEditado.setNome(nome);
         produtoEditado.setQuantidade(quantidade);
         produtoEditado.setPreco(preco);
+        salvarProdutos();
         MenuView.exibirMensagemSucesso("Produto alterado com sucesso!");
     }
     public void buscarPorNome(String buscarNome) {

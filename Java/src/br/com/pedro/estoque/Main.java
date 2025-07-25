@@ -3,6 +3,7 @@ package br.com.pedro.estoque;
 import br.com.pedro.estoque.controller.EstoqueController;
 import br.com.pedro.estoque.model.Estoque;
 import br.com.pedro.estoque.util.InputHelper;
+import br.com.pedro.estoque.view.MenuView;
 
 import java.util.Scanner;
 
@@ -15,9 +16,9 @@ public class Main {
 
         do {
             controle.iniciar();
-            System.out.println("=============================");
+            MenuView.separador();
             opcao = InputHelper.lerInt("Escolha: ");
-            System.out.println("=============================");
+            MenuView.separador();
             switch(opcao) {
                 case 1 -> controle.adicionarProduto();
                 case 2 -> controle.listarProdutos();

@@ -91,8 +91,11 @@ public class EstoqueController {
         estoque.valorTotalEmEstoque();
     }
     public void ordenarProdutos() {
+        MenuView.separador();
         MenuView.exibirMenuOrdenacao();
+        MenuView.separador();
         int escolha = InputHelper.lerInt("Escolha: ");
         estoque.ordenarPor(escolha);
+        MenuView.exibirMensagemSucesso("Ordenação concluida com sucesso.");
     }
 }

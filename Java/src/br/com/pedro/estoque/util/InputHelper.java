@@ -7,18 +7,6 @@ import java.util.Scanner;
 public class InputHelper {
     private static final Scanner scan = new Scanner(System.in);
 
-    /*public static String lerString(String mensagem) {
-        String entrada;
-        do {
-            System.out.print(mensagem);
-            entrada = scan.nextLine().trim();
-            if(entrada.isEmpty()) {
-                System.out.println("❌ O campo não pode estar vazio.");
-            }
-        } while(entrada.isEmpty());
-        return entrada;
-    }*/
-
     public static String lerNome(String mensagem) {
         String nome;
         do {
